@@ -1,103 +1,50 @@
-import Image from "next/image";
+// src/app/page.tsx
+import ContactForm from '@/components/ContactForm'; // The ONLY imported presentational component
+import Image from 'next/image'; // If your icon is an image
 
-export default function Home() {
+export default function ThrowawayLandingPage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="flex flex-col min-h-screen items-center bg-[#0A192F]"> {/* Example background color */}
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      {/* --- HERO SECTION JSX (Directly in page.tsx) --- */}
+      <section className="w-full flex flex-col items-center text-center pt-16 md:pt-24 pb-12 px-4"> {/* Added padding */}
+        {/*
+          Assuming CogniSphere is an SVG or PNG in your public folder.
+          You'll need to get the actual path and dimensions.
+        */}
+        <Image
+          src="/cognisphere-icon-light-blue.png" // Replace with your actual icon path
+          alt="CogniSphere Icon"
+          width={120} // Adjust as needed
+          height={120} // Adjust as needed
+          className="mb-6"
+        />
+        <h1 className="text-6xl md:text-7xl font-bold text-white tracking-tight mb-4">
+          June 2025
+        </h1>
+        <p className="text-3xl md:text-4xl text-gray-300">
+          From Friction to Flow
+        </p>
+      </section>
+
+      {/* --- CONTACT FORM SECTION (Directly in page.tsx, wrapping the component) --- */}
+      <section className="w-full max-w-lg flex flex-col items-center text-center py-10 px-4">
+        <ContactForm /> {/* The only component with its own file */}
+        <p className="mt-6 text-xs text-gray-400 max-w-md">
+          *Join 10 launch partners for a no-cost, $3,000 two-day, 8-point tech-stack audit & roadmap
+        </p>
+      </section>
+
+      {/* --- FOOTER SECTION JSX (Directly in page.tsx) --- */}
+      <footer className="w-full text-center py-8 mt-auto px-4">
+        <p className="text-sm text-gray-400 mb-1">
+          www.cogn8solutions.com
+        </p>
+        <p className="text-xs text-gray-500">
+          *No-cost audit for 10 launch partners
+        </p>
       </footer>
-    </div>
+
+    </main>
   );
 }
