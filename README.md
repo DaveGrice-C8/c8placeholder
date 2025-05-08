@@ -1,3 +1,6 @@
+## Description
+Purpose: 1 page placeholder site for temporary deployment on Cogn8Solutions.com domain, colleting emails for waitlist
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
