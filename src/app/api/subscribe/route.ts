@@ -1,6 +1,7 @@
 // src/app/api/subscribe/route.ts
 import { NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
+import { createServerSupabaseClient } from '@/lib/supabase';
 
 // Define a type for SendGrid errors
 type SendGridError = {
@@ -22,9 +23,33 @@ export async function POST(request: Request) {
       );
     }
 
-    // Log environment variables (safely)
-    console.log('API Key defined:', !!process.env.SENDGRID_API_KEY);
+    // Initialize Supabase client
+    const supabase = createServerSupabaseClient();
     
+    // Store email in Supabase
+    const { data, error: dbError } = await supabase
+      .from('subscribers')
+      .insert([{ 
+        email: email.toLowerCase(),
+        status: 'active',
+        source: 'landing_page'
+      }])
+      .select();
+      
+    if (dbError) {
+      // Handle unique constraint violation (email already exists)
+      if (dbError.code === '23505') {
+        console.log('Email already exists in database:', email);
+        // Continue with email sending, but note it's a duplicate
+      } else {
+        console.error('Supabase error:', dbError);
+        return NextResponse.json(
+          { error: 'Error storing email' },
+          { status: 500 }
+        );
+      }
+    }
+
     // Initialize SendGrid
     sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
     
@@ -43,21 +68,16 @@ export async function POST(request: Request) {
       from: 'c8launch@cogn8solutions.com', // Same verified sender
       subject: 'New Launch Page Signup',
       text: `New signup: ${email}`,
-      html: `<p>New signup: ${email}</p>`,
+      html: `<p>New signup: ${email}</p><p>Status: ${dbError?.code === '23505' ? 'Duplicate' : 'New'}</p>`,
     };
-    
-    console.log('Attempting to send confirmation to:', email);
-    console.log('And notification to: dave.grice@cogn8solutions.com');
     
     try {
       // First try sending just one email to test
       const response = await sgMail.send(userMsg);
-      console.log('User confirmation sent:', response);
       
       // If the first email succeeds, try sending the notification
       try {
         const notifyResponse = await sgMail.send(adminMsg);
-        console.log('Admin notification sent:', notifyResponse);
       } catch (notifyError: unknown) {
         // Log notification errors but don't fail the whole request
         console.error('Admin notification failed but user email sent:');
@@ -67,7 +87,10 @@ export async function POST(request: Request) {
         }
       }
       
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ 
+        success: true,
+        duplicate: dbError?.code === '23505'
+      });
     } catch (error: unknown) {
       console.error('SendGrid specific error:');
       
@@ -86,7 +109,7 @@ export async function POST(request: Request) {
   } catch (error: unknown) {
     console.error('General error:', error);
     return NextResponse.json(
-      { error: 'Error sending email' },
+      { error: 'Error processing request' },
       { status: 500 }
     );
   }
