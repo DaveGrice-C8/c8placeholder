@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       try {
         const notifyResponse = await sgMail.send(adminMsg);
         console.log('Admin notification sent:', notifyResponse);
-      } catch (notifyError: any) {
+      } catch (notifyError: unknown) {
         // Log notification errors but don't fail the whole request
         console.error('Admin notification failed but user email sent:');
         if (notifyError.response) {
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       }
       
       return NextResponse.json({ success: true });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('SendGrid specific error:');
       
       if (error.response) {
