@@ -24,8 +24,8 @@ export async function POST(request: Request) {
       to: email,
       from: 'c8launch@cogn8solutions.com', // Verified sender
       subject: 'Thanks for your interest in Cogn8Solutions',
-      text: 'We\'ve received your request to stay informed about our June 2025 launch. We\'ll keep you updated!',
-      html: '<p>We\'ve received your request to stay informed about our June 2025 launch. We\'ll keep you updated!</p>',
+      text: 'We\'ve received your request to stay informed about our June 2025 launch. We\'ll keep you updated!\n\n-The Cogn8Solutions Team\n\nwww.cogn8solutions.com',
+      html: '<p>We\'ve received your request to stay informed about our June 2025 launch. We\'ll keep you updated!<br><br>-The Cogn8Solutions Team<br>www.cogn8solutions.com</p>',
     };
     
     // Admin notification email
