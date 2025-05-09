@@ -2,6 +2,15 @@
 import { NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
 
+// Define a type for SendGrid errors
+type SendGridError = {
+  response?: {
+    body?: {
+      errors?: Array<{ message: string }>;
+    };
+  };
+};
+
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
@@ -52,8 +61,9 @@ export async function POST(request: Request) {
       } catch (notifyError: unknown) {
         // Log notification errors but don't fail the whole request
         console.error('Admin notification failed but user email sent:');
-        if (notifyError.response) {
-          console.error(notifyError.response.body);
+        const typedNotifyError = notifyError as SendGridError;
+        if (typedNotifyError.response) {
+          console.error(typedNotifyError.response.body);
         }
       }
       
@@ -61,18 +71,19 @@ export async function POST(request: Request) {
     } catch (error: unknown) {
       console.error('SendGrid specific error:');
       
-      if (error.response) {
+      const typedError = error as SendGridError;
+      if (typedError.response) {
         // Get more detailed error info
-        console.error(error.response.body);
+        console.error(typedError.response.body);
         return NextResponse.json(
-          { error: `SendGrid error: ${error.response.body.errors?.[0]?.message || 'Unknown error'}` },
+          { error: `SendGrid error: ${typedError.response.body?.errors?.[0]?.message || 'Unknown error'}` },
           { status: 500 }
         );
       }
       
       throw error; // Re-throw for outer catch
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('General error:', error);
     return NextResponse.json(
       { error: 'Error sending email' },
