@@ -1,68 +1,65 @@
-// src/components/ContactForm.tsx
-'use client'; // Important for using hooks like useState and event handlers
-
-import { useState } from 'react';
+"use client";
+import { useState, FormEvent } from 'react';
 
 export default function ContactForm() {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setMessage('');
-
-    // Basic client-side validation (you might add more)
-    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
-      setMessage('Please enter a valid email address.');
-      setIsLoading(false);
-      return;
-    }
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setMessage('Sending...');
 
     try {
-      const response = await fetch('/api/subscribe', { // Your API endpoint
+      const response = await fetch('/api/subscribe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ email }),
       });
-
+      
       const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message || 'Thank you for subscribing!');
-        setEmail(''); // Clear input on success
+      
+      if (data.success) {
+        setMessage('Thanks! We\'ll keep you updated.');
+        setEmail('');
       } else {
-        setMessage(data.message || 'Something went wrong. Please try again.');
+        setMessage(data.error || 'Something went wrong. Please try again.');
       }
     } catch (error) {
-      console.error('Submission error:', error);
-      setMessage('An error occurred. Please try again.');
+      setMessage('Network error. Please try again.');
+      console.error(error);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full flex flex-col sm:flex-row gap-3 items-center justify-center">
-      <input
-        type="email"
-        name="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="Enter your email"
-        required
-        className="px-4 py-3 text-base text-gray-800 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-grow w-full sm:w-auto"
-        disabled={isLoading}
-      />
-      <button
-        type="submit"
-        className="px-6 py-3 text-base font-medium text-black bg-[#9EFF00] rounded-md shadow-sm hover:bg-[#8EEC00] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#9EFF00] transition duration-150 ease-in-out w-full sm:w-auto disabled:opacity-50"
-        disabled={isLoading}
-      >
-        {isLoading ? 'Submitting...' : 'Stay Informed'}
-      </button>
-      {message && <p className="mt-3 text-sm text-white w-full text-center sm:col-span-2">{message}</p>}
+    <form onSubmit={handleSubmit} className="w-full max-w-[560px] mt-8">
+      <div className="flex relative">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Enter your email"
+          required
+          className="bg-[rgba(255,255,255,0.12)] border border-[rgba(255,255,255,0.2)] px-5 h-[54px] w-[900px] text-white"
+          style={{ borderTopLeftRadius: '38px', borderBottomLeftRadius: '38px', borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+        />
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className="bg-[#00c853] text-white font-semibold px-6 h-[54px] w-[310px]"
+          style={{ borderTopRightRadius: '38px', borderBottomRightRadius: '38px', borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+        >
+          Stay Informed
+        </button>
+      </div>
+      {message && (
+        <div className="mt-2 text-center text-white">{message}</div>
+      )}
     </form>
   );
 }
