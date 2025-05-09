@@ -1,7 +1,7 @@
 // src/app/api/subscribe/route.ts
 import { NextResponse } from 'next/server';
 import sgMail from '@sendgrid/mail';
-import { createServerSupabaseClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '../../../lib/supabase';
 
 // Define a type for SendGrid errors
 type SendGridError = {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const supabase = createServerSupabaseClient();
     
     // Store email in Supabase
-    const { data, error: dbError } = await supabase
+    const { error: dbError } = await supabase  // Remove "data" from destructuring
       .from('subscribers')
       .insert([{ 
         email: email.toLowerCase(),
@@ -72,12 +72,12 @@ export async function POST(request: Request) {
     };
     
     try {
-      // First try sending just one email to test
-      const response = await sgMail.send(userMsg);
+      // First try sending user email
+      await sgMail.send(userMsg);  // Remove response variable
       
       // If the first email succeeds, try sending the notification
       try {
-        const notifyResponse = await sgMail.send(adminMsg);
+        await sgMail.send(adminMsg);  // Remove notifyResponse variable
       } catch (notifyError: unknown) {
         // Log notification errors but don't fail the whole request
         console.error('Admin notification failed but user email sent:');
