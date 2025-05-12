@@ -52,7 +52,7 @@ export default function ContactForm() {
           type="submit"
           disabled={isSubmitting}
           className="bg-[#00c853] text-white font-semibold px-6 h-[54px] w-[310px]"
-          style={{ borderTopRightRadius: '38px', borderBottomRightRadius: '38px', borderTopLeftRadius: 0, borderBottomLeftRadius: 0 }}
+          style={{ borderTopRightRadius: '38px', borderBottomRightRadius: '38px', borderTopLeftRadius: 0, borderBottomLeftRadius: 0, lineHeight: '1.2'}}
         >
           Stay Informed
         </button>

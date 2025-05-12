@@ -40,6 +40,15 @@ export default function LandingPage() {
       {/* FOOTER */}
       <footer className="w-full text-center mt-5 md:mt-8 mb-1 px-1 z-[10]">
         <p className="text-gray-300 text-base md:text-4xl mb-0.5 font-inter">www.cogn8solutions.com</p>
+        <a
+          href="/privacy-policy.html"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-gray-400 underline hover:text-gray-200 transition-colors"
+          style={{ display: 'block', marginTop: '0.25rem' }}
+        >
+          Privacy Policy
+        </a>
       </footer>
     </main>
   );

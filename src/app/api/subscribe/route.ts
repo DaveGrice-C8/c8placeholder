@@ -23,31 +23,56 @@ export async function POST(request: Request) {
       );
     }
 
+    // Initialize database status tracking variables
+    let databaseSuccess = false;
+    let isDuplicate = false;
+
     // Initialize Supabase client
     const supabase = createServerSupabaseClient();
-    
-    // Store email in Supabase
-    const { error: dbError } = await supabase  // Remove "data" from destructuring
-      .from('subscribers')
-      .insert([{ 
-        email: email.toLowerCase(),
-        status: 'active',
-        source: 'landing_page'
-      }])
-      .select();
+    console.log('Supabase client initialized with URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? '✓ exists' : '✗ missing');
+    console.log('Supabase service role key:', process.env.SUPABASE_SERVICE_ROLE_KEY ? '✓ exists' : '✗ missing');
+
+    try {
+      console.log('Attempting to store email in Supabase:', email);
       
-    if (dbError) {
-      // Handle unique constraint violation (email already exists)
-      if (dbError.code === '23505') {
-        console.log('Email already exists in database:', email);
-        // Continue with email sending, but note it's a duplicate
+      // Store email in Supabase
+      const { data, error: dbError } = await supabase
+        .from('subscribers')
+        .insert([{ 
+          email: email.toLowerCase(),
+          status: 'active',
+          source: 'landing_page'
+        }])
+        .select();
+      
+      console.log('Supabase insert response - data:', data);
+      console.log('Supabase insert response - error:', dbError);
+        
+      if (dbError) {
+        // Handle unique constraint violation (email already exists)
+        if (dbError.code === '23505') {
+          console.log('Email already exists in database:', email);
+          isDuplicate = true;
+          // Continue with email sending, but note it's a duplicate
+        } else {
+          console.error('Supabase error details:', {
+            code: dbError.code,
+            message: dbError.message,
+            details: dbError.details,
+            hint: dbError.hint
+          });
+          return NextResponse.json(
+            { error: `Error storing email: ${dbError.message}` },
+            { status: 500 }
+          );
+        }
       } else {
-        console.error('Supabase error:', dbError);
-        return NextResponse.json(
-          { error: 'Error storing email' },
-          { status: 500 }
-        );
+        console.log('Successfully stored email in Supabase');
+        databaseSuccess = true;
       }
+    } catch (supabaseError) {
+      console.error('Unexpected Supabase error:', supabaseError);
+      // Continue with email sending despite database error
     }
 
     // Initialize SendGrid
@@ -57,9 +82,10 @@ export async function POST(request: Request) {
     const userMsg = {
       to: email,
       from: 'c8launch@cogn8solutions.com', // Verified sender
-      subject: 'Thanks for your interest in Cogn8Solutions',
-      text: 'We\'ve received your request to stay informed about our June 2025 launch. We\'ll keep you updated!\n\n-The Cogn8Solutions Team\n\nwww.cogn8solutions.com',
-      html: '<p>We\'ve received your request to stay informed about our June 2025 launch. We\'ll keep you updated!<br><br>-The Cogn8Solutions Team<br>www.cogn8solutions.com</p>',
+      templateId: 'd-7ea616e14ec04f3580d5761fa56ceb44',
+      dynamic_template_data: {
+        email: email
+      }
     };
     
     // Admin notification email
@@ -68,16 +94,16 @@ export async function POST(request: Request) {
       from: 'c8launch@cogn8solutions.com', // Same verified sender
       subject: 'New Launch Page Signup',
       text: `New signup: ${email}`,
-      html: `<p>New signup: ${email}</p><p>Status: ${dbError?.code === '23505' ? 'Duplicate' : 'New'}</p>`,
+      html: `<p>New signup: ${email}</p><p>Status: ${isDuplicate ? 'Duplicate' : 'New'}</p>`,
     };
     
     try {
       // First try sending user email
-      await sgMail.send(userMsg);  // Remove response variable
+      await sgMail.send(userMsg);
       
       // If the first email succeeds, try sending the notification
       try {
-        await sgMail.send(adminMsg);  // Remove notifyResponse variable
+        await sgMail.send(adminMsg);
       } catch (notifyError: unknown) {
         // Log notification errors but don't fail the whole request
         console.error('Admin notification failed but user email sent:');
@@ -89,7 +115,8 @@ export async function POST(request: Request) {
       
       return NextResponse.json({ 
         success: true,
-        duplicate: dbError?.code === '23505'
+        database_success: databaseSuccess,
+        duplicate: isDuplicate
       });
     } catch (error: unknown) {
       console.error('SendGrid specific error:');
